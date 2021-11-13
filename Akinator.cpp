@@ -13,6 +13,7 @@ int main()
     assert(file_ptr != nullptr);
 
     ReadDataBase(&system, file_ptr);
+    int res = DataBaseTreeCtor(&system);
     
     do
     {
@@ -43,7 +44,13 @@ int main()
     }
     while (GoAgain());
 
-    WriteDataBase(&system, file_ptr);
+    printf("Âû æåëàåòå ñîõğàíèòü íîâóş áàçó äàííûõ? Åñëè äà, ââåäèòå Y, åñëè íåò - ââåäèòå N");
+    char save_or_not[2] = {};
+    scanf("%1s", save_or_not);
+    if (save_or_not[0] == 'Y')
+    {
+        WriteDataBase(&system, file_ptr);
+    }
     
     fclose(file_ptr);
     return OK;
@@ -67,7 +74,7 @@ void TreeCtor(Tree *tree)
     tree->root->right = nullptr;
 }
 
-int DataBaseTreeCtor(System *system)
+Errors DataBaseTreeCtor(System *system)
 {
     assert(system != nullptr);
 
@@ -82,44 +89,74 @@ int DataBaseTreeCtor(System *system)
     {
         _WRONG_DATABASE;
     }
+    StackPush(&stack, nullptr);
     ++cur_symb;
-
-    char *word = nullptr;
+    
+    char *words_ending = nullptr;
     while(cur_symb - system->database.buffer < system->database.size)
-    {
+    {   
         switch (*cur_symb)
-        {
-                case '{':
-                    StackPush(&stack, cur_node);
-                    if(cur_node->left == nullptr)
-                    {
-                        cur_node->left = CreateNode();
-                        cur_node = cur_node->left;
-                    }
-                    else
-                    {
-                        if(cur_node->right != nullptr)
-                        {
-                            _WRONG_DATABASE;    
-                        }
-                        cur_node->right = CreateNode();
-                        cur_node = cur_node->right;
-                    }
-                    ++cur_symb;
-                break;
+        {    
+            case '{':
+                StackPush(&stack, cur_node);
 
-                case '}':
-                    if (stack.size == 0)
+                if(cur_node->left == nullptr)
+                {
+                    cur_node->left = CreateNode();
+                    cur_node = cur_node->left;
+                }
+                else
+                {
+                    if(cur_node->right != nullptr)
                     {
-                        
+                        _WRONG_DATABASE;            /*return*/  
                     }
-                    
-                    cur_node = (Node *) StackPop(&stack);
+                    cur_node->right = CreateNode();
+                    cur_node = cur_node->right;
+                }
+                ++cur_symb;
+            break;
+            
+            case '}':
+                if (stack.size == 0)
+                {
                     ++cur_symb;
-                break;
+                    if (sscanf(cur_symb, "%s") > 0)
+                    {
+                        _WRONG_DATABASE;            /*return*/
+                        
+                    }    
+                }
+                cur_node = (Node *) StackPop(&stack);
+        
+                ++cur_symb;
+            break;
+
+            case '|':
+                words_ending = strchr(cur_symb + 1, '|');
+                if(words_ending == nullptr)
+                {
+                    _WRONG_DATABASE;                /*return*/
+                }
+                
+                if (words_ending - (cur_symb + 1) > MAX_DATA_LENGTH)
+                {
+                    printf("Ñëèøêîì áîëüøàÿ äëèíà âîïğîñà èëè îòâåòà\n");
+                    return TOO_BIG_DATA;
+                }
+                else
+                {
+                    strncpy(cur_node->data, cur_symb + 1, (size_t) (words_ending - (cur_symb + 1)));
+                    cur_symb = words_ending + 1;
+                }
+            break;
+
+            default: 
+                _WRONG_DATABASE;                    /*return*/
         }
     }
 
+    return Errors::OK;
 }
 
 Node *CreateNode()
@@ -320,7 +357,7 @@ void VictoryBattleCry()
 
 void DirgeCry()
 {
-    printf("ß ÏĞÎÈÃĞÀË, ÍÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÒ\n");
+    printf("ß ÏĞÎÈÃĞÀË, ÍÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÅÒ\n");
 }
 
 void WriteDataBase(System *system, FILE *output_file_ptr)
@@ -343,7 +380,9 @@ void TreeWalk(Node *node, FILE *output_file_ptr)
     }
 
     fprintf(output_file_ptr, "{");
+    fprintf(output_file_ptr, "|");
     fprintf(output_file_ptr, node->data);
+    fprintf(output_file_ptr, "|");
     if(node->left != nullptr)
     {
         TreeWalk(node->left,  output_file_ptr);

@@ -19,7 +19,7 @@ struct Node
 {
     Node *left  = nullptr;
     Node *right = nullptr;
-    const char *data = nullptr;
+    char *data = nullptr;
 };
 
 struct Tree
@@ -58,7 +58,8 @@ enum Answers
 enum Errors
 {
     OK = 0,
-    WRONG_DATABASE
+    WRONG_DATABASE,
+    TOO_BIG_DATA
 };
 
 void SystemCtor(System *system);
@@ -98,6 +99,8 @@ void TreeWalk(Node *node, FILE *output_file_ptr);
 void ReadDataBase(System *system, FILE *input_file_ptr);
 
 size_t GetFileSize(FILE *file);
+
+Errors DataBaseTreeCtor(System *system);
 
 
 

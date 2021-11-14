@@ -7,6 +7,7 @@
 
 #define _WRONG_DATABASE                                 \
     printf("Неправильная база");                        \
+    printf("Line: %d", __LINE__);                       \
     return WRONG_DATABASE;                          
 
 const int  MAX_DATA_LENGTH   = 50;
@@ -59,16 +60,21 @@ enum Errors
 {
     OK = 0,
     WRONG_DATABASE,
-    TOO_BIG_DATA
+    TOO_BIG_DATA,
+    NO_OBJECT_WITH_SUCH_NAME
 };
 
 void SystemCtor(System *system);
 
+void SystemDtor(System *system);
+
 void TreeCtor(Tree *tree);
 
-Node *CreateNode();
+void TreeDtor(Tree *tree);
 
-void DeleteNode(Node *node);
+Node *NodeCtor();
+
+void NodeDtor(Node *node);
 
 int GetMode();
 
@@ -80,9 +86,9 @@ Answers AskQuestionGetAnswer(Node *cur_node);
 
 void AkinatorPlayGame(System *system);
 
-void AkinatorCompareObjects(System *system);
+int AkinatorCompareObjects(System *system);
 
-void AkinatorGetDefinition(System *system);
+int AkinatorGetDefinition(System *system);
 
 void AkinatorDoGraph(System *system);
 
@@ -94,13 +100,25 @@ void DirgeCry();
 
 void WriteDataBase(System *system, FILE *output_file_ptr);
 
-void TreeWalk(Node *node, FILE *output_file_ptr);
+void PrintTree(Node *node, FILE *output_file_ptr);
 
 void ReadDataBase(System *system, FILE *input_file_ptr);
 
 size_t GetFileSize(FILE *file);
 
-Errors DataBaseTreeCtor(System *system);
+int DataBaseTreeCtor(System *system);
+
+int SearchForWordsInBuffer(System *system, const char *words);
+
+Node *TreeSearch(Node *node, const char *obj, Stack_t *stack);
+
+void PrintDifference(Stack_t *stack1, Stack_t *stack_2);
+
+void PrintOneStr(Node *parent, Node *child);
+
+int GetName(System *system, char *obj);
+
+void PrintDefinition(Stack_t *stack);
 
 
 

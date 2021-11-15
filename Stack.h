@@ -8,11 +8,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include "ProtectionLevels.h"
+#include "Node.h"
 
-typedef void * stack_element_t;
+typedef Node* stack_element_t;
 
 const size_t EXPAND_MEMORY_COEF = 2;
-__attribute__((unused)) static stack_element_t Poison = (void *) 0xBADDED;
+__attribute__((unused)) static stack_element_t Poison = (Node *) 0xBADDED;
 
 struct Stack_t
 {

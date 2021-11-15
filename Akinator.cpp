@@ -1,5 +1,5 @@
 #include "Akinator.h"
-#include "logs.h"
+
 
 #define TEST printf("%d\n", __LINE__);
 
@@ -7,21 +7,25 @@ int main()
 {   
     setlocale(LC_ALL, "Russian");
 
-    System system = {};
-    SystemCtor(&system);
+    Prog prog = {};
+    ProgCtor(&prog);
 
     FILE *file_ptr = fopen(DATABASE_NAME, "r+");
     if (file_ptr != nullptr)
     {
-        ReadDataBase(&system, file_ptr);
-        int res = DataBaseTreeCtor(&system);
+        ReadDataBase(&prog, file_ptr);
+        int res = DataBaseTreeCtor(&prog);
+        if (res)
+        {
+            return res;
+        }
     }
     else
     {
         file_ptr = fopen(DATABASE_NAME, "w+t");
         assert(file_ptr != nullptr);
         
-        TreeCtor(&system.tree);
+        TreeCtor(&prog.tree);
     }
 
     do
@@ -31,19 +35,19 @@ int main()
         switch (mode)
         {
             case Modes::PLAY:
-                AkinatorPlayGame(&system);
+                AkinatorPlayGame(&prog);
                 break;
             
             case Modes::COMPARE:
-                AkinatorCompareObjects(&system);
+                AkinatorCompareObjects(&prog);
                 break;
 
             case Modes::GET_DEFINITION:
-                AkinatorGetDefinition(&system);
+                AkinatorGetDefinition(&prog);
                 break;
             
             case Modes::GET_DUMP:
-                AkinatorDoGraph(&system);
+                AkinatorDoGraph(&prog);
                 break;
             
             default:
@@ -59,32 +63,32 @@ int main()
     scanf("%1s", save_or_not);
     if (save_or_not[0] == 'Y')
     {
-        WriteDataBase(&system, file_ptr);
+        WriteDataBase(&prog, file_ptr);
         return OK;
     }
 
-    SystemDtor(&system);
+    ProgDtor(&prog);
 
     fclose(file_ptr);
     return OK;
 }
 
-void SystemCtor(System *system)
+void ProgCtor(Prog *prog)
 {
-    assert(system != nullptr);
+    assert(prog != nullptr);
     
-    TreeCtor(&system->tree);
+    TreeCtor(&prog->tree);
 }
 
-void SystemDtor(System *system)
+void ProgDtor(Prog *prog)
 {
-    assert(system != nullptr);
+    assert(prog != nullptr);
 
-    TreeDtor(&system->tree);
+    TreeDtor(&prog->tree);
 
-    free(system->database.buffer);
-    system->database.size = 0;
-    system->database.buffer = nullptr;
+    free(prog->database.buffer);
+    prog->database.size = 0;
+    prog->database.buffer = nullptr;
 }
 
 void TreeCtor(Tree *tree)
@@ -93,7 +97,7 @@ void TreeCtor(Tree *tree)
     
     tree->root = NodeCtor();
 
-    tree->root->data  = "Ќеизвестно кто";
+    tree->root->data  =  NEW_DATABASE_BEGINNING;
     tree->root->left  = nullptr;
     tree->root->right = nullptr;
 }
@@ -109,17 +113,17 @@ void TreeDtor(Tree *tree)
     }
 }
 
-int DataBaseTreeCtor(System *system)
+int DataBaseTreeCtor(Prog *prog)
 {
-    assert(system != nullptr);
+    assert(prog != nullptr);
 
     Stack_t stack = {};
     StackCtor(&stack, MAX_TREE_DEPTH);
 
     Node *cur_node = NodeCtor();
-    system->tree.root = cur_node;
+    prog->tree.root = cur_node;
 
-    char *cur_symb = system->database.buffer;
+    char *cur_symb = prog->database.buffer;
     if (*cur_symb != '{')
     {
         _WRONG_DATABASE;
@@ -128,7 +132,7 @@ int DataBaseTreeCtor(System *system)
     ++cur_symb;
     
     char *words_ending = nullptr;
-    while((cur_symb - system->database.buffer) < system->database.size)
+    while((cur_symb - prog->database.buffer) < prog->database.size)
     {   
         switch (*cur_symb)
         {    
@@ -155,12 +159,12 @@ int DataBaseTreeCtor(System *system)
             case '}':
                 if (stack.size == 0)
                 {
-                    ++cur_symb;
-                    if (sscanf(cur_symb, "%s") > 0)
+                    if (cur_symb - prog->database.buffer != prog->database.size - 1)
                     {
-                        _WRONG_DATABASE;            /*return*/
-                        
+                        _WRONG_DATABASE;            /*return*/ 
                     }    
+
+                    break;
                 }
                 cur_node = (Node *) StackPop(&stack);
         
@@ -293,76 +297,99 @@ Answers AskQuestionGetAnswer(Node *cur_node)
     return UNKNOWN_ANSWER;
 }
 
-void AkinatorPlayGame(System *system)
+void AkinatorPlayGame(Prog *prog)
 {
-    assert(system != nullptr);
+    assert(prog != nullptr);
 
-    Node *cur = system->tree.root;
+    Node *cur_node = prog->tree.root;
     
     int end = 0;
 
+    Stack_t backtrace = {};
+    StackCtor(&backtrace, MAX_TREE_DEPTH);
+
     while (!end)
     {
-        assert(cur != nullptr);
+        assert(cur_node != nullptr);
         
-        Answers answer = AskQuestionGetAnswer(cur);
+        Answers answer = AskQuestionGetAnswer(cur_node);
         while (answer == UNKNOWN_ANSWER)
         {
             printf("Ќепон€тный ответ, попробуйте заново\n");
-            answer = AskQuestionGetAnswer(cur);
+            answer = AskQuestionGetAnswer(cur_node);
         }
         
         switch (answer)
         {
             case Answers::YES:
-                if (cur->left == nullptr)
+                if (cur_node->left == nullptr)
                 {
                     end = 1;
                     VictoryBattleCry();
                 }
                 else
                 {
-                    cur = cur->left;
+                    cur_node = cur_node->left;
                 }
             break;
 
             case Answers::NO:
-                if (cur->right == nullptr)
-                {
-                    end = -1;
-                    DirgeCry();   
-                    break;
+                if (cur_node->right == nullptr)
+                {   
+                    if (backtrace.size > 0)
+                    {
+                        printf("ѕопробуем еще раз...\n");
+                        cur_node = StackPop(&backtrace);
+                    }
+                    else
+                    {
+                        end = -1;
+                        DirgeCry();
+                    }   
                 }
                 else
                 {
-                    cur = cur->right;
+                    cur_node = cur_node->right;
                 }
             break;
 
-            //todo: idk
+            case Answers::IDK:
+                if (cur_node->left == nullptr)
+                {
+                    PrintIDK();
+                    end = 1;
+                }
+                else
+                {
+                    StackPush(&backtrace, cur_node);
+                    cur_node = cur_node->left;
+                }
+            break;
+
+            case Answers::UNKNOWN_ANSWER:
+                printf("Unknown answer\n");
+            break;
+
+            default: 
+            break; 
         }
-
-        if (end != -1)
-        {
-            continue;
-        }
-
-        char *new_object = GetNewObject();
-        char *difference = GetDifference(cur->data, new_object);
-
-        cur->left  = NodeCtor();
-        cur->right = NodeCtor();
-
-        cur->left->data  = new_object;
-        cur->right->data = cur->data;
-        cur->data = difference;
-        
     }
-}
 
-void AkinatorDoGraph(System *system)
-{
-    assert(system != nullptr);
+    StackDtor(&backtrace);
+    if (end != -1)
+    {
+        return;
+    }
+
+    char *new_object = GetNewObject();
+    char *difference = GetDifference(cur_node->data, new_object);
+
+    cur_node->left  = NodeCtor();
+    cur_node->right = NodeCtor();
+
+    cur_node->left->data  = new_object;
+    cur_node->right->data = cur_node->data;
+    cur_node->data = difference;
 }
 
 int GoAgain()
@@ -385,12 +412,12 @@ void DirgeCry()
     printf("я ѕ–ќ»√–јЋ, Ќ≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈“\n");
 }
 
-void WriteDataBase(System *system, FILE *output_file_ptr)
+void WriteDataBase(Prog *prog, FILE *output_file_ptr)
 {
-    assert(system != nullptr);
+    assert(prog != nullptr);
     
     rewind(output_file_ptr);
-    PrintTree(system->tree.root, output_file_ptr);
+    PrintTree(prog->tree.root, output_file_ptr);
     
     fclose(output_file_ptr);
 }
@@ -402,25 +429,29 @@ void PrintTree(Node *node, FILE *output_file_ptr)
 
     fprintf(output_file_ptr, "{");
     fprintf(output_file_ptr, "|");
-    fprintf(output_file_ptr, node->data);
+    fprintf(output_file_ptr, "%s", node->data);
     fprintf(output_file_ptr, "|");
 
     if (node->left != nullptr)
     {
         PrintTree(node->left,  output_file_ptr);
+    }
+    
+    if (node->right != nullptr)
+    {
         PrintTree(node->right, output_file_ptr);
     }
 
     fprintf(output_file_ptr, "}");
 }
 
-void ReadDataBase(System *system, FILE *input_file_ptr)
+void ReadDataBase(Prog *prog, FILE *input_file_ptr)
 {
-    assert(system != nullptr);
+    assert(prog != nullptr);
 
-    system->database.size = GetFileSize(input_file_ptr);
-    system->database.buffer = (char *) calloc(system->database.size, sizeof(char));
-    system->database.size = fread(system->database.buffer, sizeof(char), system->database.size, input_file_ptr);
+    prog->database.size = GetFileSize(input_file_ptr);
+    prog->database.buffer = (char *) calloc(prog->database.size, sizeof(char));
+    prog->database.size = fread(prog->database.buffer, sizeof(char), prog->database.size, input_file_ptr);
 }
 
 size_t GetFileSize(FILE *file)
@@ -432,20 +463,20 @@ size_t GetFileSize(FILE *file)
     return file_size;
 }
 
-int AkinatorCompareObjects(System *system)
+int AkinatorCompareObjects(Prog *prog)
 {
-    assert(system != nullptr);
+    assert(prog != nullptr);
 
     char obj1[MAX_DATA_LENGTH] = {};
     printf("»м€ первого объекта: ");
-    if (GetName(system, obj1))
+    if (GetName(prog, obj1))
     {
         return NO_OBJECT_WITH_SUCH_NAME;    
     }           
                                                                                                                   
     char obj2[MAX_DATA_LENGTH] = {};
     printf("»м€ второго объекта: ");
-    if (GetName(system, obj2))
+    if (GetName(prog, obj2))
     {
         return NO_OBJECT_WITH_SUCH_NAME;    
     }
@@ -455,8 +486,8 @@ int AkinatorCompareObjects(System *system)
     StackCtor(&descr1, MAX_TREE_DEPTH);
     StackCtor(&descr2, MAX_TREE_DEPTH);
 
-    TreeSearch(system->tree.root, obj1, &descr1);
-    TreeSearch(system->tree.root, obj2, &descr2);
+    TreeSearch(prog->tree.root, obj1, &descr1);
+    TreeSearch(prog->tree.root, obj2, &descr2);
 
     PrintDifference(&descr1, &descr2);
 
@@ -466,16 +497,16 @@ int AkinatorCompareObjects(System *system)
     return OK;
 }
 
-int SearchForWordsInBuffer(System *system, const char *words)
+int SearchForWordsInBuffer(Prog *prog, const char *words)
 {
-    assert(system != nullptr);
+    assert(prog != nullptr);
     assert(words  != nullptr);
 
     size_t len = strlen(words);
 
-    for (size_t index = 0; index < system->database.size - len + 1; ++index)
+    for (size_t index = 0; index < prog->database.size - len + 1; ++index)
     {
-        if (strncmp(system->database.buffer + index, words, len) == 0)
+        if (strncmp(prog->database.buffer + index, words, len) == 0)
         {
             return OK;
         }
@@ -566,30 +597,35 @@ void PrintOneStr(Node *parent, Node *child)
     printf("%s", parent->data);
 }
 
-int AkinatorGetDefinition(System *system)
+int AkinatorGetDefinition(Prog *prog)
 {
-    assert(system != nullptr);
+    assert(prog != nullptr);
 
     printf("ќ ком или о чем вы хотите узнать?\n");
     char obj[MAX_DATA_LENGTH] = {};
-    GetName(system, obj);
+    GetName(prog, obj);
 
     Stack_t stack = {};
     StackCtor(&stack, MAX_TREE_DEPTH);
 
-    TreeSearch(system->tree.root, obj, &stack);
+    if (TreeSearch(prog->tree.root, obj, &stack) == nullptr)
+    {
+        return NO_OBJECT_WITH_SUCH_NAME;
+    }
 
     PrintDefinition(&stack);
 
     StackDtor(&stack);
+
+    return OK;
 }
 
-int GetName(System *system, char *obj)
+int GetName(Prog *prog, char *obj)
 {
     rewind(stdin);
     fgets(obj, MAX_DATA_LENGTH, stdin);
     obj[strlen(obj) - 1] = '\0';
-    if (SearchForWordsInBuffer(system, obj))
+    if (SearchForWordsInBuffer(prog, obj))
     {
         printf("¬ базе данных %s не найден\n", obj);
         return NO_OBJECT_WITH_SUCH_NAME;
@@ -613,4 +649,67 @@ void PrintDefinition(Stack_t *stack)
         }
     }
     printf("\n");
+}
+
+void AkinatorDoGraph(Prog *prog)
+{
+    assert(prog != nullptr);
+    assert(prog->tree.root != nullptr);
+
+    FILE *graph_file = fopen(GRAPH_NAME, "w");
+    assert(graph_file != nullptr);
+
+    fprintf(graph_file, "digraph G{\n"
+                        "   ");
+
+    GraphNode(prog->tree.root, graph_file);
+
+    fprintf(graph_file, "}");
+
+    fclose(graph_file);
+
+    char do_graph[MAX_COMMAND_LENGTH] = {};
+    sprintf(do_graph, "dot -Tpng %s -o %s", GRAPH_NAME, IMG_NAME);
+    system(do_graph);
+}
+
+void GraphNode(Node *node, FILE *graph_file)
+{
+    assert(node != nullptr);
+    assert(graph_file != nullptr);
+
+    if ((node->left != nullptr) && (node->right != nullptr))
+    {
+        fprintf(graph_file, "P%p[shape=record, label=\"left\\n %p | %s\\n %p | right\\n %p\"];\n    ", node, node->left, node->data, node, node->right);
+    }
+    else
+    {
+        fprintf(graph_file, "P%p[shape=record, label=\" left \\n nullptr| %s\\n%p | right\\n nullptr\"];\n    ", node, node->data, node);
+    }
+    
+    if (node->left != nullptr)
+    {
+        GraphNode(node->left, graph_file);
+    }
+
+    if (node->right != nullptr)
+    {
+        GraphNode(node->right, graph_file);
+    }
+
+    if (node->left != nullptr)
+    {
+        fprintf(graph_file, "P%p->P%p[label=\"Y\"];\n", node, node->left);
+    }
+
+    if (node->right != nullptr)
+    {
+        fprintf(graph_file, "P%p->P%p[label=\"N\"];\n", node, node->right);
+    }                                                                                       
+}
+
+void PrintIDK()
+{
+    printf("¬ы сами не знаете, кого загадали? Ќу тогда ");
+    VictoryBattleCry();
 }

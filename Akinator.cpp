@@ -1,77 +1,8 @@
 #include "Akinator.h"
 
-
-#define TEST printf("%d\n", __LINE__);
-
-int main()
-{   
-    setlocale(LC_ALL, "Russian");
-
-    Prog prog = {};
-    ProgCtor(&prog);
-
-    FILE *file_ptr = fopen(DATABASE_NAME, "r+");
-    if (file_ptr != nullptr)
-    {
-        ReadDataBase(&prog, file_ptr);
-        int res = DataBaseTreeCtor(&prog);
-        if (res)
-        {
-            return res;
-        }
-    }
-    else
-    {
-        file_ptr = fopen(DATABASE_NAME, "w+t");
-        assert(file_ptr != nullptr);
-        
-        TreeCtor(&prog.tree);
-    }
-
-    do
-    {
-        int mode = GetMode();
-
-        switch (mode)
-        {
-            case Modes::PLAY:
-                AkinatorPlayGame(&prog);
-                break;
-            
-            case Modes::COMPARE:
-                AkinatorCompareObjects(&prog);
-                break;
-
-            case Modes::GET_DEFINITION:
-                AkinatorGetDefinition(&prog);
-                break;
-            
-            case Modes::GET_DUMP:
-                AkinatorDoGraph(&prog);
-                break;
-            
-            default:
-                printf("Неизвестный режим работы программы\n");
-                break;
-        }
-    }
-    while (GoAgain());
-
-    printf("Вы желаете сохранить базу данных? Если да, введите Y, если нет - введите N: ");
-
-    char save_or_not[2] = {};
-    scanf("%1s", save_or_not);
-    if (save_or_not[0] == 'Y')
-    {
-        WriteDataBase(&prog, file_ptr);
-        return OK;
-    }
-
-    ProgDtor(&prog);
-
-    fclose(file_ptr);
-    return OK;
-}
+const char *GRAPH_NAME    = "AkinatorGraph.dot";
+const char *IMG_NAME      = "AkinatorImg.png";
+char NEW_DATABASE_BEGINNING[15] = "Неизвестно кто";
 
 void ProgCtor(Prog *prog)
 {
@@ -658,9 +589,9 @@ void AkinatorDoGraph(Prog *prog)
 
     FILE *graph_file = fopen(GRAPH_NAME, "w");
     assert(graph_file != nullptr);
-
+    
     fprintf(graph_file, "digraph G{\n"
-                        "   ");
+                        "    ");
 
     GraphNode(prog->tree.root, graph_file);
 
@@ -680,11 +611,11 @@ void GraphNode(Node *node, FILE *graph_file)
 
     if ((node->left != nullptr) && (node->right != nullptr))
     {
-        fprintf(graph_file, "P%p[shape=record, label=\"left\\n %p | %s\\n %p | right\\n %p\"];\n    ", node, node->left, node->data, node, node->right);
+        fprintf(graph_file, "P%p[shape=record, label=\"left \\n %p | %s \\n %p | right \\n %p\"];\n    ", node, node->left, node->data, node, node->right);
     }
     else
     {
-        fprintf(graph_file, "P%p[shape=record, label=\" left \\n nullptr| %s\\n%p | right\\n nullptr\"];\n    ", node, node->data, node);
+        fprintf(graph_file, "P%p[shape=record, label=\"left \\n nill | %s %p | right \\n nill \"];\n    ", node, node->data, node);
     }
     
     if (node->left != nullptr)
@@ -700,11 +631,12 @@ void GraphNode(Node *node, FILE *graph_file)
     if (node->left != nullptr)
     {
         fprintf(graph_file, "P%p->P%p[label=\"Y\"];\n", node, node->left);
+
     }
 
     if (node->right != nullptr)
     {
-        fprintf(graph_file, "P%p->P%p[label=\"N\"];\n", node, node->right);
+        fprintf(graph_file, "P%p->P%p[label=\"N\"];\n", node, node->right);   
     }                                                                                       
 }
 

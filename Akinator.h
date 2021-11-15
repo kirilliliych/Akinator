@@ -19,11 +19,6 @@ const int  MAX_TREE_DEPTH     = 50;
 const int  MAX_COMMAND_LENGTH = 200; 
 const int  CODE_PAGE          = 1251;
 
-const char *DATABASE_NAME = "Database.txt";
-const char *GRAPH_NAME    = "AkinatorGraph.dot";
-const char *IMG_NAME      = "AkinatorImg.png";
-char NEW_DATABASE_BEGINNING[15] = "Неизвестно кто";
-
 struct Tree
 {
     Node *root = nullptr; 

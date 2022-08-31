@@ -15,4 +15,4 @@ on it.
 ### Structure
 ***
 The program is to be interacted with by a command line. By the way, some of its functions demand third-party programs
-such as <a href = "https://graphviz.org/"></a>
+such as [graphviz](https://graphviz.org/).

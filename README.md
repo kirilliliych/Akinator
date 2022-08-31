@@ -28,7 +28,7 @@ When you launch the program, it asks you about the mode you want to use. Here ar
 1. Allows to play the game. Akinator might guess your object or not (after some unsuccessful attempts it will surrender).
 2. Allows to compare two objects that are already in database (it will enumerate all their characteristics showing
    differences between objects).
-3. Allows to receive a complete definition of an object from database (enumerating all its characteristics)
+3. Allows to receive a complete definition of an object from database (enumerating all its characteristics).
 4. Builds a scheme (a tree) where all objects and questions that exist in database are shown. The picture is called "AkinatorImg.png".
 
 If the program have not guessed your object, it will ask you to add the unknown object to the database. You are to name the object and
@@ -48,6 +48,9 @@ should be:
 So we place '}' symbol when we return to the node from its left descendant during in-order traversal. __IMPORTANT!__ No spaces or 
 another symbols are allowed between those technical symbols, otherwise database will be corrupted. Following these rules, it is 
 possible to make changes in database even straightforward.
+
+Example of database: if string looks like _{|zhivotnoye?|{|krasivoye?|{|Poltorashka|}{|Tarakan|}}{|Phystech|}}_, then
+its graph dump looks like ![ALT](AkinatorImg.png).
 
 Each time before you want to exit program it will ask you whether you want to save updated database. If yes, it will be rewrited,
 otherwise nothing will be changed.

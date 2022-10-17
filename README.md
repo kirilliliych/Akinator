@@ -32,7 +32,7 @@ When you launch the program, it asks you about the mode you want to use. Here ar
 4. Builds a scheme (a tree) where all objects and questions that exist in database are shown. The picture is called "AkinatorImg.png".
 
 If the program have not guessed your object, it will ask you to add the unknown object to the database. You are to name the object and
-give the quality that distringuishes it from considered one. __IMPORTANT!__ You should name the quality which __OBJECT THAT IS ADDED 
+give the quality that distinguishes it from considered one. __IMPORTANT!__ You should name the quality which __OBJECT THAT IS ADDED 
 POSESS__.
 
 

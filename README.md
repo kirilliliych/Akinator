@@ -2,27 +2,23 @@
 
 This program is free-to-use for all kinds of developers.
 
-
-### What does the project do 
 ***
+## What does the project do 
 It is a small version of "Akinator" browser game, which asks you questions trying to indetify an object that was guessed.
 
-
-### Why is the project useful
 ***
+## Why is the project useful
 Despite the fact that writing such a program might be entertaining and even funny because of its functionality, 
 it also allows to work with fundamental data structure which is binary tree, because the implementation is based
 on it.
 
-
-### Structure
 ***
+## Structure
 The program is to be interacted with by a command line. By the way, some of its functions demand usage of third-party 
 programs such as [graphviz](https://graphviz.org/).
 
-
-### Functionality
 ***
+## Functionality
 When you launch the program, it asks you about the mode you want to use. Here are they:
 
 1. Allows to play the game. Akinator might guess your object or not (after some unsuccessful attempts it will surrender).
@@ -35,9 +31,8 @@ If the program have not guessed your object, it will ask you to add the unknown 
 give the quality that distinguishes it from considered one. __IMPORTANT!__ You should name the quality which __OBJECT THAT IS ADDED 
 POSESS__.
 
-
-### Database
-*** 
+***
+## Database
 Database is a .txt file which contains all objects that the program is able to identify; all questions that exist can be also found there.
 
 The string with data should always begin with the symbol '{' and end with '}'. All data is kept in a form of a binary tree:
@@ -55,18 +50,16 @@ its graph dump looks like ![ALT](AkinatorImg.png).
 Each time before you want to exit program it will ask you whether you want to save updated database. If yes, it will be rewrited,
 otherwise nothing will be changed.
 
-
-### How can I help
 ***
+## How can I help
 I explicitly welcome any outside contributors. Use my mail: _ilichev.kv@phystech.edu_.
 
 __A strong request__:
 * Do not break the codestyle
 * Do not destroy previous functionality with additions
 
-
-### Where to ask questions
 ***
+## Where to ask questions
 Use the mail mentioned earlier.
 
    

@@ -4,7 +4,7 @@ This program is free-to-use for all kinds of developers.
 
 ***
 ## What does the project do 
-It is a small version of "Akinator" browser game, which asks you questions trying to indetify an object that was guessed.
+It is a small version of "Akinator" browser game, which asks you questions trying to indentify an object that was guessed.
 
 ***
 ## Why is the project useful
@@ -45,7 +45,7 @@ another symbols are allowed between those technical symbols, otherwise database 
 possible to make changes in database even straightforward.
 
 Example of database: if string looks like _{|zhivotnoye?|{|krasivoye?|{|Poltorashka|}{|Tarakan|}}{|Phystech|}}_, then
-its graph dump looks like ![ALT](AkinatorImg.png).
+its graph dump looks like this: ![picture](AkinatorImg.png).
 
 Each time before you want to exit program it will ask you whether you want to save updated database. If yes, it will be rewrited,
 otherwise nothing will be changed.

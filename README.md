@@ -33,11 +33,11 @@ POSESS__.
 
 ***
 ## Database
-Database is a .txt file which contains all objects that the program is able to identify; all questions that exist can be also found there.
+Database is a _.txt_ file which contains all objects that the program is able to identify; all questions that exist can be also found there.
 
-The string with data should always begin with the symbol '{' and end with '}'. All data is kept in a form of a binary tree:
-when we want go to the left descendant of a node, we use symbol '{'. If some information (string) is contained in a node then its name 
-should be:
+The string with data should always begin with the symbol '{' and end with '}'. All data is kept in a form of a binary tree.
+When we want go to the left descendant of a node, we use symbol '{'; in its turn symbol '}' tells that traversal of descendants of current node is ended.
+If some information (string) is contained in a node then its name should be:
 1. Between '{' and '}' symbols that relate to this node (because we use in-order tree traversal);
 2. Between '|' and '|' symbols that surround string in order to facilitate the process of reading information from nodes.
 So we place '}' symbol when we return to the node from its left descendant during in-order traversal. __IMPORTANT!__ No spaces or 
@@ -45,7 +45,7 @@ another symbols are allowed between those technical symbols, otherwise database 
 possible to make changes in database even straightforward.
 
 Example of database: if string looks like _{|zhivotnoye?|{|krasivoye?|{|Poltorashka|}{|Tarakan|}}{|Phystech|}}_, then
-its graph dump looks like this: ![database_picture](readme_pictures/AkinatorImg.png).
+its graph dump looks like this: ![picture](AkinatorImg.png).
 
 Each time before you want to exit program it will ask you whether you want to save updated database. If yes, it will be rewrited,
 otherwise nothing will be changed.
@@ -55,8 +55,8 @@ otherwise nothing will be changed.
 I explicitly welcome any outside contributors. Use my mail: _ilichev.kv@phystech.edu_.
 
 __A strong request__:
-* Do not break the codestyle
-* Do not destroy previous functionality with additions
+- Do not break the codestyle
+- Do not destroy previous functionality with additions
 
 ***
 ## Where to ask questions

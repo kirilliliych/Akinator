@@ -45,7 +45,7 @@ another symbols are allowed between those technical symbols, otherwise database 
 possible to make changes in database even straightforward.
 
 Example of database: if string looks like _{|zhivotnoye?|{|krasivoye?|{|Poltorashka|}{|Tarakan|}}{|Phystech|}}_, then
-its graph dump looks like this: ![picture](AkinatorImg.png).
+its graph dump looks like this: ![database_picture](readme_pictures/AkinatorImg.png).
 
 Each time before you want to exit program it will ask you whether you want to save updated database. If yes, it will be rewrited,
 otherwise nothing will be changed.
